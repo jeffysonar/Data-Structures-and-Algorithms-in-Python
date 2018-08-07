@@ -1,4 +1,6 @@
 from Node import BinaryTreeNode as BNode
+from Queue import Queue
+from Stack import Stack
 
 class BinaryTree:
 
@@ -20,6 +22,14 @@ class BinaryTree:
 	def __repr__(self):
 		return ("PreOrder : "+str(self.preorder())+"\nInOrder : "+str(self.inorder())+"\nPostOrder : "+str(self.postorder()))
 
+# method get_root : returns root of tree
+	def get_root(self):
+		return self.root
+
+# method set_root : returns root of tree
+	def set_root(self, root):
+		self.root = root
+
 # method build_pre_in : builds tree from preorder and inorder traversal list
 # parameters :	pre - preorder traversal list
 #		ino - inorder traversal list
@@ -40,8 +50,8 @@ class BinaryTree:
 
 			return current
 		_buildprein.pointer = 0
-		self.root = _buildprein(pre, ino, BNode(pre[0]))
-		return self.root
+		self.set_root(_buildprein(pre, ino, BNode(pre[0])))
+		return self.get_root()
 
 # method build_post_in : builds tree from postorder and inorder traversal list
 # parameters :	post - postorder traversal list
@@ -63,8 +73,8 @@ class BinaryTree:
 
 			return current
 		_buildpostin.pointer = len(post) - 1
-		self.root = _buildpostin(post, ino, BNode(post[-1]))
-		return self.root
+		self.set_root(_buildpostin(post, ino, BNode(post[-1])))
+		return self.get_root()
 
 # method preorder_rec : traverse tree in preorder, recursively 
 # parameters for inner method :	root - current root of tree (subtree)
@@ -78,18 +88,18 @@ class BinaryTree:
 			_preorder_rec(root.get_left(), result)
 			_preorder_rec(root.get_right(), result)
 		result = []
-		_preorder_rec(self.root, result)
+		_preorder_rec(self.get_root(), result)
 		return result
 
 # method preorder_ite : traverse tree in preorder, iteratively
 # parameters :	no parameters
 # returns : preorder traversed list
 	def preorder_ite(self):
-		if not self.root:
+		if not self.get_root():
 			return
 		result = []
 		stack = []
-		stack.append(self.root)
+		stack.append(self.get_root())
 		while stack:
 			node = stack.pop()
 			result.append(node.get_data())
@@ -115,18 +125,18 @@ class BinaryTree:
 			result.append(root.get_data())
 			_inorder_rec(root.get_right(),result)
 		result = []
-		_inorder_rec(self.root, result)
+		_inorder_rec(self.get_root(), result)
 		return result
 
 # method inorder_ite : traverse tree in inorder, iteratively
 # parameters :	no parameters
 # returns : inorder traversed list
 	def inorder_ite(self):
-		if not self.root:
+		if not self.get_root():
 			return
 		result = []
 		stack = []
-		node = self.root
+		node = self.get_root()
 		while stack or node:
 			if node:
 				stack.append(node)
@@ -155,19 +165,19 @@ class BinaryTree:
 			_postorder_rec(root.get_right(), result)
 			result.append(root.get_data())
 		result = []
-		_postorder_rec(self.root, result)
+		_postorder_rec(self.get_root(), result)
 		return result
 
 # method postorder_ite : traverse tree in postorder, iteratively
 # parameters :	no parameters
 # returns : postorder traversed list
 	def postorder_ite(self):
-		if not self.root:
+		if not self.get_root():
 			return
 		result = []
 		visited = set()
 		stack = []
-		node = self.root
+		node = self.get_root()
 		while stack or node:
 			if node:
 				stack.append(node)
@@ -188,3 +198,85 @@ class BinaryTree:
 # returns : postorder traversed list
 	def postorder(self):
 		return self.postorder_rec()
+
+# method levelorder : method for level order traversal
+# parameters : no parameters
+# returns : returns level order traversed list
+	def levelorder(self):
+		result = []
+		queue = Queue()
+		queue.enqueue(self.get_root())
+		while not queue.is_empty():
+			current = queue.dequeue()
+			result.append(current)
+			if current.get_left() is not None:
+				queue.enqueue(current.get_left())
+			if current.get_right() is not None:
+				queue.enqueue(current.get_right())
+		return result
+
+# method bfs : Breadth First Search (BFS)
+# parameters : 	element - to search
+# returns:	None - if element is absent in tree
+#		element - else
+	def bfs(self, element):
+		result = []
+		queue = Queue()
+		queue.enqueue(self.get_root())
+		while not queue.is_empty():
+			current = queue.dequeue()
+			if current.get_data() == element:
+				return element
+			if current.get_left() is not None:
+				queue.enqueue(current.get_left())
+			if current.get_right() is not None:
+				queue.enqueue(current.get_right())				
+		return None
+
+# method dfs : Depth First Search (DFS)
+# parameters : 	element - to search
+# returns:	None - if element is absent in tree
+#		element - else
+	def dfs(self, element):
+		result = []
+		stack = Stack()
+		stack.push(self.get_root())
+		while not stack.is_empty():
+			current = stack.pop()
+			if current.get_data() == element:
+				return element
+			if current.get_right() is not None:
+				stack.push(current.get_right())
+			if current.get_left() is not None:
+				stack.push(current.get_left())
+		return None
+
+# method find_max : finds maximum element in tree
+# parameters : no parameters
+# returns : maximum element in this tree
+	def find_max(self):
+		def _find_max(root):
+			if not root:
+				return
+			if root.get_data() > _find_max.max:
+				_find_max.max = root.get_data()
+			_find_max(root.get_left())
+			_find_max(root.get_right())
+			return _find_max.max
+		_find_max.max = self.root.get_data()
+		return _find_max(self.get_root())
+
+# method find_min : finds minimum element in tree
+# parameters : no parameters
+# returns : minimum element in this tree
+	def find_min(self):
+		def _find_min(root):
+			if not root:
+				return
+			if root.get_data() < _find_min.min:
+				_find_min.min = root.get_data()
+			_find_min(root.get_left())
+			_find_min(root.get_right())
+			return _find_min.min
+		_find_min.min = self.root.get_data()
+		return _find_min(self.get_root())
