@@ -2,10 +2,16 @@ from Node import BinaryTreeNode as BNode
 from Queue import Queue
 from Stack import Stack
 
+def sort(lst):
+	return list(map(lambda l : l**2, lst))
+
 class BinaryTree:
 
 # constructor : initialises Binary Tree
 # root : root of Binary Tree
+# pre : preorder traversal list
+# ino : inorder traversal list
+# post : postorder traversal list
 	def __init__(self, pre = None, ino = None, post = None):
 		if pre and ino:
 			self.build_pre_in(pre, ino)
@@ -280,3 +286,127 @@ class BinaryTree:
 			return _find_min.min
 		_find_min.min = self.root.get_data()
 		return _find_min(self.get_root())
+
+# BST - Binary Search Tree
+
+class BST:
+
+# constructor : initialises Binary Tree
+# root : root of Binary Tree
+# lst : list of elements 
+	def __init__(self, lst):
+		self.root = self.build_bst(lst)
+
+# toString : returns as string of sorted (inorder) elements
+	def __str__(self):
+		return str(self.inorder())
+
+# representation : returns representation with preorder, inorder and postorder traversal
+	def __repr__(self):
+		return str(self.get_list())
+
+# method get_root : returns root of tree
+	def get_root(self):
+		return self.root
+
+# method set_root : returns root of tree
+	def set_root(self, root):
+		self.root = root
+
+# method get_list : gets sorted list of elements in tree
+# parameters for inner method : root - root of current sub tree
+# returns : list of elements in sorted form
+	def get_list(self):
+		def make_list(root):
+			if root is None: 
+				return ""
+			return make_list(root.get_left())+" "+str(root.get_data())+" "+make_list(root.get_right())
+		return make_list(self.get_root()).split()	
+	
+# method build_bst : builds bst of a passed list of elements
+# parameters : lst - list of elements
+# returns : root of constructed bst
+	def build_bst(self, lst):
+		def _build_bst(lst):
+			l = len(lst)
+			if l == 0:
+				return None
+			if l == 1: 
+				return BNode(lst[0])
+			return BNode(lst[l//2], _build_bst(lst[:(l//2)]), _build_bst(lst[(l//2)+1:]))
+		lst = sort(lst)
+		self.set_root(_build_bst(lst))
+		return self.get_root()
+
+# method insert : inserts element in BinaryTree
+# parameter : 	data - data to insert
+# returns : nothing
+	def insert(self, data):
+		def _insert(root):
+			if data < root.get_data():
+				if root.get_left() is None:
+					root.set_left(BNode(data))
+				else:
+					_insert(root.get_left())
+			else:
+				if root.get_right() is None:
+					root.set_right(BNode(data))
+				else:
+					_insert(root.get_right())
+		if self.get_root() is None:
+			self.set_root(BNode(data))
+		else:
+			_insert(self.get_root())		
+
+# method delete : deletes a node present in BST
+# parameters : data - data of node to delete
+# returns :    True - if element is deleted
+# 	       False - if element is not found
+	def delete(self, data):
+		def _delete(root):
+			if root is None:
+				return None
+			current = root.get_data()
+			if current == data:
+				_delete.flag = True
+				if (root.get_left() is None) & (root.get_right() is None): # zero child
+					return None
+				elif root.get_left() is None:	# right child
+					return root.get_right()
+				elif root.get_right() is None:  # left child
+					return root.get_left()
+				else:				# two children
+					# we will replace it with minimum node in right subtree
+					# it will be left most node in right subtree
+					prev = root.get_right()
+					minnode = root.get_right()
+					while minnode.get_left() is not None:
+						prev = minnode
+						minnode = prev.get_left()
+					root.set_data(minnode.get_data())
+					prev.set_left(None)
+					# return root
+			elif data < current:
+				root.set_left(_delete(root.get_left()))
+			else:	# data > current
+				root.set_right(_delete(root.get_right()))
+			return root
+		_delete.flag = False
+		self.set_root(_delete(self.get_root()))
+		return _delete.flag
+
+# method search : searches an element using binary search
+# parameters : data - element to search
+# returns : data - if element is found
+#	    None - if element is absent
+	def search(self, data):
+		root = self.get_root()
+		while root is not None:
+			current = root.get_data()
+			if data == current:
+				return data
+			elif data < current:
+				root = root.get_left()
+			else: 	# data > current
+				root = root.get_right()
+		return None
