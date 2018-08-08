@@ -1,9 +1,7 @@
 from Node import BinaryTreeNode as BNode
 from Queue import Queue
 from Stack import Stack
-
-def sort(lst):
-	return list(map(lambda l : l**2, lst))
+from Sorting import insertion_sort as sort
 
 class BinaryTree:
 
@@ -299,7 +297,7 @@ class BST:
 
 # toString : returns as string of sorted (inorder) elements
 	def __str__(self):
-		return str(self.inorder())
+		return str(self.get_list())
 
 # representation : returns representation with preorder, inorder and postorder traversal
 	def __repr__(self):
