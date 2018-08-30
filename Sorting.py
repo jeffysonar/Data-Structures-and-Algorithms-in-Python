@@ -136,13 +136,13 @@ def insertion_sort(A, ascending=True):
 # returns : sorted array
 def merge_sort(A, ascending=True):
 	compare = compare_func(ascending)
-	def _merge_sort(A, p, r):
+	def _merge_sort(p, r):
 		if p < r:
 			q = (p + r) // 2
-			_merge_sort(A, p, q)
-			_merge_sort(A, q + 1, r)
-			merge(A, p, q, r)
-	def merge(A, p, q, r):
+			_merge_sort(p, q)
+			_merge_sort(q + 1, r)
+			merge(p, q, r)
+	def merge(p, q, r):
 		L = A[p:(q+1)] + [float("infinity")]
 		R = A[q+1:r+1] + [float("infinity")]
 		i = j = 0
@@ -153,17 +153,21 @@ def merge_sort(A, ascending=True):
 			else:
 				A[k] = R[j]
 				j += 1
-	_merge_sort(A, 0, len(A) - 1)
+	_merge_sort(0, len(A) - 1)
 	return A
 
+# method quick_sort : sorts given list using quick sort
+# parameters : 	A - input list
+#		ascending - True if sorting is ascending, else False
+# returns : sorted array
 def quick_sort(A, ascending=True):
 	compare = compare_func(ascending)
-	def _quick_sort(A, p ,r):
+	def _quick_sort(p ,r):
 		if p < r:
-			q = partition(A, p, r)
-			_quick_sort(A, p, q-1)
-			_quick_sort(A, q+1, r)
-	def partition(A, p, r):
+			q = partition(p, r)
+			_quick_sort(p, q-1)
+			_quick_sort(q+1, r)
+	def partition(p, r):
 		pivot = A[r]
 		i = p
 		j = p
@@ -174,7 +178,73 @@ def quick_sort(A, ascending=True):
 			j += 1
 		sort_swap(A, i, r)
 		return i 
-	_quick_sort(A, 0, len(A)-1)
+	_quick_sort(0, len(A)-1)
 	return A
 
-print(bubble_sort([4,3,2,1,0,8,5,7,6,9], False))
+# method heap_sort : sorts given list using heap sort
+# parameters : 	A - input list
+#		ascending - True if sorting is ascending, else False
+# returns : sorted array
+def heap_sort(A, ascending=True):
+	from Heap import BinaryHeap
+	h = BinaryHeap(A, not ascending)
+	for i in range(len(A)):
+		A[i] = h.extract_root()
+	return A
+
+# method tree_sort : sorts given list using tree sort
+# parameters : 	A - input list
+#		ascending - True if sorting is ascending, else False
+# returns : sorted array
+def tree_sort(A, ascending=True):
+	from Tree import BST
+	def traverse(root):
+		if not root:
+			return
+		traverse(get_left(root))
+		A[traverse.point] = root.get_data()
+		traverse.point += 1
+		traverse(get_right(root))
+	t = BST()
+	for i in range(len(A)):
+		t.insert(A[i])
+	if ascending:
+		get_left = lambda root: root.get_left()
+		get_right = lambda root: root.get_right()
+	else:
+		get_left = lambda root: root.get_right()
+		get_right = lambda root: root.get_left()
+	traverse.point = 0
+	traverse(t.root)
+	return A	
+
+# method tim_sort : sorts given list using tim sort
+# parameters : 	A - input list
+#		ascending - True if sorting is ascending, else False
+# returns : sorted array
+def tim_sort(A, ascending=True):
+	run = 32
+	compare = compare_func(ascending)
+	def _tim(p, r):
+		if (r - p) > run:
+			q = (p + r) // 2
+			_tim(p, q)
+			_tim(q+1, r)
+			A[p:q+1] = insertion_sort(A[p:q+1], ascending)
+			A[q+1:r+1] = insertion_sort(A[q+1:r+1], ascending)
+			merge(p, q, r)
+		else:
+			A[p:r+1] = insertion_sort(A[p:r+1], ascending)
+	def merge(p, q, r):
+		L = A[p:(q+1)] + [float("infinity")]
+		R = A[q+1:r+1] + [float("infinity")]
+		i = j = 0
+		for k in range(p, r+1):
+			if compare(L[i], R[j]):
+				A[k] = L[i]
+				i += 1
+			else:
+				A[k] = R[j]
+				j += 1
+	_tim(0, len(A) - 1)
+	return A
